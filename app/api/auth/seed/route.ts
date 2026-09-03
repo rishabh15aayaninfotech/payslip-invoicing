@@ -3,9 +3,10 @@ import { connectToDatabase } from "@/lib/mongodb";
 import { User } from "@/models/User";
 import { Template } from "@/models/Template";
 import { Payslip } from "@/models/Payslip";
+import { isMongoConnectivityError } from "@/lib/mongo-errors";
 import bcrypt from "bcryptjs";
 
-const initialTemplatesSeed = [
+export const initialTemplatesSeed = [
   {
     id: "tpl-corporate-blue",
     name: "Corporate Classic",
@@ -116,7 +117,7 @@ const initialTemplatesSeed = [
   },
 ];
 
-const initialPayslipsSeed = [
+export const initialPayslipsSeed = [
   {
     id: "PS-2026-0401",
     empCode: "EMP-1001",
@@ -182,39 +183,52 @@ const initialPayslipsSeed = [
 ];
 
 export async function seedDatabaseIfEmpty() {
-  await connectToDatabase();
+  try {
+    await connectToDatabase();
 
-  // 1. Seed Admin User
-  const adminCount = await User.countDocuments();
-  if (adminCount === 0) {
-    const hashedPassword = await bcrypt.hash("admin123", 10);
-    await User.create({
-      name: "Rishabh Sharma",
-      email: "admin@payslip.in",
-      password: hashedPassword,
-      role: "ADMIN",
-    });
-  }
+    // 1. Seed Admin User
+    const adminCount = await User.countDocuments();
+    if (adminCount === 0) {
+      const hashedPassword = await bcrypt.hash("admin123", 10);
+      await User.create({
+        name: "Rishabh Sharma",
+        email: "admin@payslip.in",
+        password: hashedPassword,
+        role: "ADMIN",
+      });
+    }
 
-  // 2. Seed Templates
-  const templateCount = await Template.countDocuments();
-  if (templateCount === 0) {
-    await Template.insertMany(initialTemplatesSeed);
-  }
+    // 2. Seed Templates
+    const templateCount = await Template.countDocuments();
+    if (templateCount === 0) {
+      await Template.insertMany(initialTemplatesSeed);
+    }
 
-  // 3. Seed Payslips
-  const payslipCount = await Payslip.countDocuments();
-  if (payslipCount === 0) {
-    await Payslip.insertMany(initialPayslipsSeed);
+    // 3. Seed Payslips
+    const payslipCount = await Payslip.countDocuments();
+    if (payslipCount === 0) {
+      await Payslip.insertMany(initialPayslipsSeed);
+    }
+
+    return true;
+  } catch (error: unknown) {
+    if (isMongoConnectivityError(error)) {
+      return false;
+    }
+
+    throw error;
   }
 }
 
 export async function GET() {
   try {
-    await seedDatabaseIfEmpty();
+    const connected = await seedDatabaseIfEmpty();
     return NextResponse.json({
       success: true,
-      message: "MongoDB Atlas database initialized and seeded successfully.",
+      mode: connected ? "database" : "demo",
+      message: connected
+        ? "MongoDB Atlas database initialized and seeded successfully."
+        : "MongoDB is unreachable. Running in demo mode with in-memory data.",
     });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
