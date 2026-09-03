@@ -52,9 +52,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
     <div className="admin-grid min-h-screen bg-background text-foreground">
       {/* Mobile backdrop */}
       <div
-        className={`fixed inset-0 z-30 bg-slate-950/70 backdrop-blur-xs transition-opacity duration-300 lg:hidden ${
-          mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
-        }`}
+        className={`fixed inset-0 z-30 bg-slate-950/70 backdrop-blur-xs transition-opacity duration-300 lg:hidden ${mobileOpen ? "opacity-100" : "pointer-events-none opacity-0"
+          }`}
         onClick={() => setMobileOpen(false)}
       />
 
@@ -63,18 +62,17 @@ export function AdminShell({ children }: { children: ReactNode }) {
         className={`fixed inset-y-0 left-0 z-40 border-r border-white/10 bg-surface/95 shadow-2xl shadow-black/30 backdrop-blur-2xl transition-all duration-300 ease-in-out ${
           /* Mobile slide */
           mobileOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 ${
+          } lg:translate-x-0 ${
           /* Desktop collapse */
           isCollapsed ? "lg:w-[76px] lg:px-3" : "lg:w-[260px] lg:px-4"
-        } flex flex-col py-5`}
+          } flex flex-col py-5`}
       >
         {/* Brand Header */}
         <div className="flex items-center justify-between px-1">
           <Link
             href="/dashboard"
-            className={`flex items-center gap-3 transition-all duration-300 ${
-              isCollapsed ? "lg:justify-center lg:w-full" : ""
-            }`}
+            className={`flex items-center gap-3 transition-all duration-300 ${isCollapsed ? "lg:justify-center lg:w-full" : ""
+              }`}
             onClick={() => setMobileOpen(false)}
           >
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-accent to-accent-strong font-semibold text-white shadow-md shadow-accent/20">
@@ -113,15 +111,13 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 href={item.href}
                 title={isCollapsed ? item.label : undefined}
                 onClick={() => setMobileOpen(false)}
-                className={`group flex items-center rounded-2xl transition-all duration-200 ${
-                  isCollapsed
+                className={`group flex items-center rounded-2xl transition-all duration-200 ${isCollapsed
                     ? "justify-center p-3"
                     : "gap-3.5 px-3.5 py-3"
-                } ${
-                  active
+                  } ${active
                     ? "bg-white text-slate-950 font-medium shadow-lg shadow-white/10"
                     : "text-white/70 hover:bg-white/[0.06] hover:text-white"
-                }`}
+                  }`}
               >
                 <span className={`${active ? "text-slate-950" : "text-white/60 group-hover:text-white"}`}>
                   {item.icon}
@@ -142,9 +138,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
             href="/login"
             title="Sign out"
             onClick={() => setMobileOpen(false)}
-            className={`group flex items-center rounded-2xl text-xs font-medium text-white/70 hover:bg-danger/10 hover:text-danger border border-white/5 hover:border-danger/20 transition-all duration-200 ${
-              isCollapsed ? "justify-center p-3" : "gap-3 px-3.5 py-2.5"
-            }`}
+            className={`group flex items-center rounded-2xl text-xs font-medium text-white/70 hover:bg-danger/10 hover:text-danger border border-white/5 hover:border-danger/20 transition-all duration-200 ${isCollapsed ? "justify-center p-3" : "gap-3 px-3.5 py-2.5"
+              }`}
           >
             <svg
               className="h-4 w-4 shrink-0 text-white/50 group-hover:text-danger transition"
@@ -168,9 +163,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
 
       {/* Main Content Area */}
       <div
-        className={`min-h-screen transition-all duration-300 ease-in-out ${
-          isCollapsed ? "lg:pl-[76px]" : "lg:pl-[260px]"
-        }`}
+        className={`min-h-screen transition-all duration-300 ease-in-out ${isCollapsed ? "lg:pl-[76px]" : "lg:pl-[260px]"
+          }`}
       >
         {/* Topbar */}
         <header className="sticky top-0 z-20 border-b border-white/10 bg-background/80 px-4 py-3.5 backdrop-blur-xl sm:px-6 lg:px-8">
@@ -198,7 +192,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   d={isCollapsed ? "M14 9l3 3-3 3" : "M16 9l-3 3 3 3"}
                 />
               </svg>
-              </button>
+            </button>
 
             {/* Search Box */}
             <div className="flex flex-1 items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2">
@@ -226,9 +220,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 </div>
                 <span className="hidden sm:inline font-medium text-white/90">Rishabh</span>
                 <svg
-                  className={`h-3.5 w-3.5 text-white/50 transition-transform duration-200 ${
-                    userMenuOpen ? "rotate-180 text-white" : ""
-                  }`}
+                  className={`h-3.5 w-3.5 text-white/50 transition-transform duration-200 ${userMenuOpen ? "rotate-180 text-white" : ""
+                    }`}
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -254,7 +247,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                       R
                     </div>
                     <div className="overflow-hidden">
-                      <p className="text-xs font-semibold text-white truncate">Rishabh Sharma</p>
+                      <p className="text-xs font-semibold text-white truncate">Rishabh Chandra</p>
                       <p className="text-[11px] text-white/50 truncate">admin@payslip.in</p>
                     </div>
                   </div>

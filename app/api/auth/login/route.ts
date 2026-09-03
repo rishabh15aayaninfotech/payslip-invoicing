@@ -6,13 +6,6 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "payslip_pro_secret_key_2026";
-const DEMO_USER = {
-  id: "super-admin",
-  name: "Rishabh Chandra",
-  email: "admin@payslip.in",
-  role: "ADMIN",
-  password: "admin123",
-} as const;
 
 function createAuthResponse(user: {
   id: string;
@@ -53,11 +46,6 @@ function createAuthResponse(user: {
   return response;
 }
 
-function isDatabaseConnectivityError(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error);
-  return /ECONNREFUSED|ENOTFOUND|ETIMEDOUT|MongoServerSelectionError|querySrv/i.test(message);
-}
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -71,54 +59,32 @@ export async function POST(request: Request) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
-    const isDemoLogin =
-      normalizedEmail === DEMO_USER.email && password === DEMO_USER.password;
+    await connectToDatabase();
+    // Auto-seed if database is first time initialized
+    await seedDatabaseIfEmpty();
 
-    try {
-      await connectToDatabase();
-      // Auto-seed if database is first time initialized
-      await seedDatabaseIfEmpty();
-
-      const user = await User.findOne({ email: normalizedEmail });
-      if (!user) {
-        return NextResponse.json(
-          { success: false, error: "Invalid work email or password." },
-          { status: 401 }
-        );
-      }
-
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return NextResponse.json(
-          { success: false, error: "Invalid work email or password." },
-          { status: 401 }
-        );
-      }
-
-      return createAuthResponse({
-        id: String(user._id),
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      });
-    } catch (dbError) {
-      if (isDemoLogin && isDatabaseConnectivityError(dbError)) {
-        return createAuthResponse(DEMO_USER);
-      }
-
-      if (isDatabaseConnectivityError(dbError)) {
-        return NextResponse.json(
-          {
-            success: false,
-            error:
-              "Database connection is unavailable right now. Please try again after MongoDB is reachable.",
-          },
-          { status: 503 }
-        );
-      }
-
-      throw dbError;
+    const user = await User.findOne({ email: normalizedEmail });
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Invalid work email or password." },
+        { status: 401 }
+      );
     }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return NextResponse.json(
+        { success: false, error: "Invalid work email or password." },
+        { status: 401 }
+      );
+    }
+
+    return createAuthResponse({
+      id: String(user._id),
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Internal server error";
     return NextResponse.json(
