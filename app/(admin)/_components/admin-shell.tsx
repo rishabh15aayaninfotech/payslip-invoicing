@@ -23,7 +23,16 @@ const navigation: NavItem[] = [
     ),
   },
   {
-    label: "Payslip",
+    label: "Payslip Templates",
+    href: "/dashboard/templates",
+    icon: (
+      <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+      </svg>
+    ),
+  },
+  {
+    label: "Generate Payslip",
     href: "/dashboard/payslip",
     icon: (
       <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -31,12 +40,14 @@ const navigation: NavItem[] = [
       </svg>
     ),
   },
+
+
   {
-    label: "Payslip Templates",
-    href: "/dashboard/templates",
+    label: "Payslip Records",
+    href: "/dashboard/payslip-records",
     icon: (
       <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 7h10M7 11h10M7 15h6m5-10H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V7a2 2 0 00-2-2z" />
       </svg>
     ),
   },
@@ -103,7 +114,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
           {navigation.map((item) => {
             const active =
               pathname === item.href ||
-              (item.href !== "/dashboard" && pathname.startsWith(item.href));
+              (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
 
             return (
               <Link
@@ -112,8 +123,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 title={isCollapsed ? item.label : undefined}
                 onClick={() => setMobileOpen(false)}
                 className={`group flex items-center rounded-2xl transition-all duration-200 ${isCollapsed
-                    ? "justify-center p-3"
-                    : "gap-3.5 px-3.5 py-3"
+                  ? "justify-center p-3"
+                  : "gap-3.5 px-3.5 py-3"
                   } ${active
                     ? "bg-white text-slate-950 font-medium shadow-lg shadow-white/10"
                     : "text-white/70 hover:bg-white/[0.06] hover:text-white"
