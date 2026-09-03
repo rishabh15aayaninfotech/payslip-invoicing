@@ -38,31 +38,28 @@ export default function DashboardPage() {
   const [hoveredMonth, setHoveredMonth] = useState<MonthlyData>(monthlyTrends[monthlyTrends.length - 1]);
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner / Welcome Row */}
-      <section className="flex flex-col justify-between gap-4 rounded-3xl border border-white/10 bg-white/[0.04] p-6 shadow-xl backdrop-blur-2xl sm:flex-row sm:items-center sm:p-7">
+    <div className="space-y-4">
+      {/* Compact Top Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <span className="text-xs font-semibold tracking-widest text-accent uppercase">
-            Overview & Analytics
-          </span>
-          <h1 className="mt-1 text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            Welcome back, Rishabh
+          <h1 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
+            Payroll Overview
           </h1>
-          <p className="mt-1 text-xs text-white/55 sm:text-sm">
-            Here is your current payroll summary, disbursement volume, and department breakdown.
+          <p className="text-xs text-white/50">
+            Monthly disbursements & salary statistics
           </p>
         </div>
 
         <Link
           href="/dashboard/payslip"
-          className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-accent to-accent-strong px-5 py-3 text-xs font-semibold text-white shadow-lg shadow-accent/20 transition hover:brightness-110 active:scale-95 sm:text-sm"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-accent to-accent-strong px-3.5 py-2 text-xs font-semibold text-white shadow-md shadow-accent/20 transition hover:brightness-110 active:scale-95"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
           Generate Payslip
         </Link>
-      </section>
+      </div>
 
       {/* 4 Summary Stats */}
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
