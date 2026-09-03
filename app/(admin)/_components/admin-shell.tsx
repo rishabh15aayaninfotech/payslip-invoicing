@@ -134,22 +134,34 @@ export function AdminShell({ children }: { children: ReactNode }) {
           })}
         </nav>
 
-        {/* System status widget */}
-        {!isCollapsed ? (
-          <div className="mt-auto rounded-2xl border border-white/10 bg-white/[0.03] p-3.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-white/50">System Status</span>
-              <span className="flex items-center gap-1.5 text-success">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                Online
-              </span>
-            </div>
-          </div>
-        ) : (
-          <div className="mt-auto flex justify-center" title="System Online">
-            <span className="h-2 w-2 rounded-full bg-success shadow-[0_0_10px_rgba(74,222,128,0.8)]" />
-          </div>
-        )}
+        {/* Sidebar Footer: Sign out */}
+        <div className="mt-auto border-t border-white/10 pt-3">
+          <Link
+            href="/login"
+            title="Sign out"
+            onClick={() => setMobileOpen(false)}
+            className={`group flex items-center rounded-2xl text-xs font-medium text-white/70 hover:bg-danger/10 hover:text-danger border border-white/5 hover:border-danger/20 transition-all duration-200 ${
+              isCollapsed ? "justify-center p-3" : "gap-3 px-3.5 py-2.5"
+            }`}
+          >
+            <svg
+              className="h-4 w-4 shrink-0 text-white/50 group-hover:text-danger transition"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.8}
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+              />
+            </svg>
+            {!isCollapsed && (
+              <span className="overflow-hidden whitespace-nowrap">Sign out</span>
+            )}
+          </Link>
+        </div>
       </aside>
 
       {/* Main Content Area */}
@@ -198,12 +210,16 @@ export function AdminShell({ children }: { children: ReactNode }) {
               />
             </div>
 
-            {/* Switch User / Action */}
+            {/* User Profile Pill */}
             <Link
               href="/login"
-              className="hidden rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-xs font-medium text-white/75 transition hover:bg-white/10 hover:text-white md:inline-flex"
+              title="Signed in as Rishabh (Click to switch)"
+              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/80 transition hover:bg-white/10 hover:text-white"
             >
-              Sign out
+              <div className="flex h-5 w-5 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-accent-strong text-[10px] font-bold text-white">
+                R
+              </div>
+              <span className="hidden sm:inline font-medium text-white/90">Rishabh</span>
             </Link>
           </div>
         </header>
