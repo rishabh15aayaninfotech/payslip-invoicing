@@ -45,6 +45,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   return (
     <div className="admin-grid min-h-screen bg-background text-foreground">
@@ -210,17 +211,103 @@ export function AdminShell({ children }: { children: ReactNode }) {
               />
             </div>
 
-            {/* User Profile Pill */}
-            <Link
-              href="/login"
-              title="Signed in as Rishabh (Click to switch)"
-              className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/80 transition hover:bg-white/10 hover:text-white"
-            >
-              <div className="flex h-5 w-5 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-accent-strong text-[10px] font-bold text-white">
-                R
-              </div>
-              <span className="hidden sm:inline font-medium text-white/90">Rishabh</span>
-            </Link>
+            {/* User Profile Dropdown */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setUserMenuOpen((prev) => !prev)}
+                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs text-white/80 transition hover:bg-white/10 hover:text-white cursor-pointer active:scale-95"
+              >
+                <div className="flex h-5 w-5 items-center justify-center rounded-lg bg-gradient-to-br from-accent to-accent-strong text-[10px] font-bold text-white shadow-sm shadow-accent/20">
+                  R
+                </div>
+                <span className="hidden sm:inline font-medium text-white/90">Rishabh</span>
+                <svg
+                  className={`h-3.5 w-3.5 text-white/50 transition-transform duration-200 ${
+                    userMenuOpen ? "rotate-180 text-white" : ""
+                  }`}
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Backdrop to dismiss */}
+              {userMenuOpen && (
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setUserMenuOpen(false)}
+                />
+              )}
+
+              {/* Floating Dropdown Menu */}
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-60 rounded-2xl border border-white/15 bg-surface/95 p-2 shadow-2xl backdrop-blur-2xl z-50 animate-in fade-in slide-in-from-top-2 duration-150">
+                  {/* User Info Header */}
+                  <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-white/10">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-accent-strong text-xs font-bold text-white shadow-md shadow-accent/20">
+                      R
+                    </div>
+                    <div className="overflow-hidden">
+                      <p className="text-xs font-semibold text-white truncate">Rishabh Sharma</p>
+                      <p className="text-[11px] text-white/50 truncate">admin@payslip.in</p>
+                    </div>
+                  </div>
+
+                  {/* Navigation Links */}
+                  <div className="py-1.5 space-y-0.5 text-xs">
+                    <Link
+                      href="/dashboard"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-white/70 hover:bg-white/5 hover:text-white transition"
+                    >
+                      <svg className="h-4 w-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                      </svg>
+                      Dashboard
+                    </Link>
+
+                    <Link
+                      href="/dashboard/payslip"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-white/70 hover:bg-white/5 hover:text-white transition"
+                    >
+                      <svg className="h-4 w-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
+                      </svg>
+                      Payslip Studio
+                    </Link>
+
+                    <Link
+                      href="/dashboard/templates"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-white/70 hover:bg-white/5 hover:text-white transition"
+                    >
+                      <svg className="h-4 w-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+                      </svg>
+                      Templates
+                    </Link>
+                  </div>
+
+                  {/* Sign Out Action */}
+                  <div className="border-t border-white/10 pt-1.5">
+                    <Link
+                      href="/login"
+                      onClick={() => setUserMenuOpen(false)}
+                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-danger hover:bg-danger/10 transition"
+                    >
+                      <svg className="h-4 w-4 text-danger" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                      </svg>
+                      Sign Out
+                    </Link>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
