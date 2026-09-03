@@ -72,3 +72,55 @@ select {
     radial-gradient(circle at top left, rgba(124, 160, 255, 0.12), transparent 28%),
     radial-gradient(circle at 95% 0%, rgba(155, 124, 255, 0.14), transparent 20%);
 }
+
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+  }
+
+  aside,
+  header,
+  nav,
+  .no-print,
+  .print\:hidden {
+    display: none !important;
+  }
+
+  .admin-grid {
+    background: transparent !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  #printable-payslip {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 24px !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+
+  #printable-payslip * {
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+  }
+
+  #printable-payslip .print-text-accent {
+    color: #1e40af !important;
+  }
+
+  #printable-payslip .print-bg-subtle {
+    background-color: #f8fafc !important;
+  }
+}
