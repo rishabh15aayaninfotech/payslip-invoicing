@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import type { ReactNode } from "react";
+import { ThemeToggle } from "../../_components/theme-provider";
 
 interface NavItem {
   label: string;
@@ -197,7 +198,7 @@ export function AdminShell({ children }: { children: ReactNode }) {
                   d={isCollapsed ? "M14 9l3 3-3 3" : "M16 9l-3 3 3 3"}
                 />
               </svg>
-            </button>
+              </button>
 
             {/* Search Box */}
             <div className="flex flex-1 items-center gap-2.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2">
@@ -210,6 +211,8 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 className="w-full border-0 bg-transparent text-xs text-white outline-none placeholder:text-white/30"
               />
             </div>
+
+            <ThemeToggle className="hidden sm:inline-flex" />
 
             {/* User Profile Dropdown */}
             <div className="relative">

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { LoginForm } from "../_components/login-form";
+import { ThemeToggle } from "../../_components/theme-provider";
 
 export default function LoginPage() {
   return (
@@ -11,6 +12,10 @@ export default function LoginPage() {
       </div>
 
       <div className="relative w-full max-w-[420px]">
+        <div className="absolute -top-14 right-0 sm:-top-16">
+          <ThemeToggle />
+        </div>
+
         {/* Main Card */}
         <div className="rounded-3xl border border-white/10 bg-surface/85 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.4)] backdrop-blur-2xl sm:p-9">
           {/* Logo & Header */}
