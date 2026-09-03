@@ -489,8 +489,8 @@ export default function PayslipTemplatesPage() {
       {/* Drawer / Modal: Field & Layout Configuration */}
       {editingTemplate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm overflow-y-auto">
-          <div className="relative w-full max-w-xl my-8 rounded-3xl border border-white/10 bg-surface p-6 shadow-2xl backdrop-blur-2xl">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="relative flex w-full max-w-5xl max-h-[92vh] flex-col overflow-hidden rounded-3xl border border-white/10 bg-surface shadow-2xl backdrop-blur-2xl">
+            <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-6 py-5">
               <div>
                 <div className="flex items-center gap-2">
                   <span
@@ -517,7 +517,8 @@ export default function PayslipTemplatesPage() {
               </button>
             </div>
 
-            <div className="mt-5 space-y-4 text-xs">
+            <div className="flex-1 overflow-y-auto px-6 py-5 text-xs">
+              <div className="space-y-4">
               {/* Status and Default controls */}
               <div className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                 <div>
@@ -545,7 +546,8 @@ export default function PayslipTemplatesPage() {
               <div className="space-y-2.5">
                 <p className="font-semibold text-white/80">Visible Fields & Sections</p>
 
-                {[
+                <div className="grid gap-2 md:grid-cols-2">
+                  {[
                   { key: "showLogo", label: "Company Logo & Header Title" },
                   { key: "showCompanyAddress", label: "Company Address & CIN/GSTIN Details" },
                   { key: "showPanUan", label: "Employee PAN & UAN/PF Account Numbers" },
@@ -554,24 +556,25 @@ export default function PayslipTemplatesPage() {
                   { key: "showAmountInWords", label: "Net Payable Amount in Words (INR)" },
                   { key: "showSignatory", label: "Authorized Signatory Box / Stamp Area" },
                   { key: "showQrCode", label: "Digital Verification QR Code Badge" },
-                ].map(({ key, label }) => {
-                  const fieldKey = key as keyof TemplateConfig["fields"];
-                  const isChecked = editingTemplate.fields[fieldKey];
-                  return (
-                    <label
-                      key={key}
-                      className="flex items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-2.5 cursor-pointer hover:bg-white/[0.04] transition"
-                    >
-                      <span className="text-white/80">{label}</span>
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={(e) => handleUpdateField(fieldKey, e.target.checked)}
-                        className="h-4 w-4 rounded border-white/20 bg-white/5 text-accent focus:ring-accent accent-accent"
-                      />
-                    </label>
-                  );
-                })}
+                  ].map(({ key, label }) => {
+                    const fieldKey = key as keyof TemplateConfig["fields"];
+                    const isChecked = editingTemplate.fields[fieldKey];
+                    return (
+                      <label
+                        key={key}
+                        className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-2.5 cursor-pointer transition hover:bg-white/[0.04]"
+                      >
+                        <span className="text-white/80">{label}</span>
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => handleUpdateField(fieldKey, e.target.checked)}
+                          className="h-4 w-4 shrink-0 rounded border-white/20 bg-white/5 text-accent focus:ring-accent accent-accent"
+                        />
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
 
               {/* Custom Footer Notes */}
@@ -606,6 +609,7 @@ export default function PayslipTemplatesPage() {
                 >
                   Done
                 </button>
+              </div>
               </div>
             </div>
           </div>

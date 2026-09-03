@@ -314,32 +314,6 @@ export default function PayslipPage() {
 
   const { gross, deductions, net } = calculateTotals(formData);
 
-  const handlePresetSelect = (empId: string) => {
-    const found = savedRecords.find((p) => p.id === empId) || samplePresets.find((p) => p.id === empId);
-    if (found) {
-      setFormData({ ...found });
-    } else {
-      setFormData({
-        ...samplePresets[0],
-        id: `PS-2026-${String(savedRecords.length + 1).padStart(4, "0")}`,
-        empCode: `EMP-${1000 + savedRecords.length + 1}`,
-        empName: "",
-        designation: "Software Engineer",
-        department: "Engineering",
-        basic: 40000,
-        hra: 16000,
-        specialAllowance: 8000,
-        conveyance: 2000,
-        bonus: 0,
-        pf: 3600,
-        pt: 200,
-        tds: 2500,
-        insurance: 800,
-        lop: 0,
-      });
-    }
-  };
-
   const handleSaveRecord = async () => {
     setSaving(true);
     try {
@@ -384,22 +358,20 @@ export default function PayslipPage() {
             Customize salary particulars on the left & preview formatted A4 document on the right
           </p>
         </div>
-
         {/* Top Controls */}
         <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs">
-            <span className="text-white/40">Employee:</span>
+          <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs">
+            <span className="text-white/40">Template:</span>
             <select
-              value={formData.id}
-              onChange={(e) => handlePresetSelect(e.target.value)}
-              className="bg-transparent text-xs font-medium text-white outline-none cursor-pointer"
+              value={selectedTemplate}
+              onChange={(e) => setSelectedTemplate(e.target.value as TemplateType)}
+              className="min-w-[170px] bg-transparent text-xs font-medium text-white outline-none cursor-pointer"
             >
-              {savedRecords.map((p) => (
-                <option key={p.id} value={p.id} className="bg-surface text-white">
-                  {p.empName || "Draft Employee"} ({p.empCode})
+              {templateOptions.map((tpl) => (
+                <option key={tpl.id} value={tpl.id} className="bg-surface text-white">
+                  {tpl.name}
                 </option>
               ))}
-              <option value="NEW" className="bg-surface text-white">+ New Employee Form</option>
             </select>
           </div>
 
@@ -1189,69 +1161,10 @@ export default function PayslipPage() {
                 </div>
               </div>
             )}
-          </div>
-        </div>
       </div>
-
-      {/* ========================================================================= */}
-      {/* BOTTOM SECTION: Saved Records Table                                       */}
-      {/* ========================================================================= */}
-      <section className="rounded-2xl border border-white/10 bg-surface/90 p-5 shadow-lg backdrop-blur-xl no-print">
-        <div className="flex items-center justify-between border-b border-white/10 pb-3">
-          <div>
-            <h2 className="text-sm font-bold text-white">Saved Records ({savedRecords.length})</h2>
-            <p className="text-[11px] text-white/50">Click &quot;Load in Studio&quot; to inspect and edit salary slips</p>
-          </div>
-        </div>
-
-        <div className="mt-3 overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-white/10 text-white/40 uppercase tracking-wider text-[11px]">
-                <th className="py-2.5 px-3">Slip ID</th>
-                <th className="py-2.5 px-3">Employee</th>
-                <th className="py-2.5 px-3">Period</th>
-                <th className="py-2.5 px-3">Net Pay</th>
-                <th className="py-2.5 px-3">Status</th>
-                <th className="py-2.5 px-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-white/5">
-              {savedRecords.map((item) => {
-                const itemNet = calculateTotals(item).net;
-                return (
-                  <tr key={item.id} className="hover:bg-white/[0.02] transition">
-                    <td className="py-2.5 px-3 font-mono text-accent">{item.id}</td>
-                    <td className="py-2.5 px-3">
-                      <span className="font-semibold text-white">{item.empName}</span>
-                      <span className="text-white/45 text-[11px] ml-2">({item.empCode})</span>
-                    </td>
-                    <td className="py-2.5 px-3 text-white/70">{item.month} {item.year}</td>
-                    <td className="py-2.5 px-3 font-semibold text-white">₹{itemNet.toLocaleString("en-IN")}</td>
-                    <td className="py-2.5 px-3">
-                      <span className="rounded-full bg-success/15 text-success px-2 py-0.5 text-[10px] font-medium">
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="py-2.5 px-3 text-right">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setFormData({ ...item });
-                          window.scrollTo({ top: 0, behavior: "smooth" });
-                        }}
-                        className="rounded-lg border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/80 hover:bg-white/10 hover:text-white"
-                      >
-                        Load in Studio
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
+      </div>
+      </div>
+      </div>
   );
 }
+
