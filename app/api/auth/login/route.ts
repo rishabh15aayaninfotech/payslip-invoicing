@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { User } from "@/models/User";
-import { seedDatabaseIfEmpty } from "../seed/route";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -60,8 +59,6 @@ export async function POST(request: Request) {
 
     const normalizedEmail = email.toLowerCase().trim();
     await connectToDatabase();
-    // Auto-seed if database is first time initialized
-    await seedDatabaseIfEmpty();
 
     const user = await User.findOne({ email: normalizedEmail });
     if (!user) {

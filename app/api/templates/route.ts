@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Template } from "@/models/Template";
-import { seedDatabaseIfEmpty } from "../auth/seed/route";
 
 export async function GET() {
   try {
     await connectToDatabase();
-    await seedDatabaseIfEmpty();
 
     const templates = await Template.find({}).sort({ isDefault: -1, createdAt: 1 });
     return NextResponse.json({ success: true, templates });

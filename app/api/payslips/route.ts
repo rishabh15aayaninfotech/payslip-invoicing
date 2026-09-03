@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Payslip } from "@/models/Payslip";
-import { seedDatabaseIfEmpty } from "../auth/seed/route";
 
 export async function GET() {
   try {
     await connectToDatabase();
-    await seedDatabaseIfEmpty();
 
     const payslips = await Payslip.find({}).sort({ createdAt: -1 });
     return NextResponse.json({ success: true, payslips });
