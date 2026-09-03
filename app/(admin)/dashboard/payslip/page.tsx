@@ -328,32 +328,34 @@ export default function PayslipPage() {
     setPreviewOpen(true);
   };
 
-  const openPrintableWindow = () => {
-    const html = capturePrintableMarkup();
-    if (!html) return null;
+  const handleDownloadPayslip = async () => {
+    try {
+      const res = await fetch("/api/payslips/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          formData,
+          templateLayout: selectedTemplate,
+        }),
+      });
 
-    const win = window.open("", "_blank", "noopener,noreferrer,width=1200,height=900");
-    if (!win) return null;
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.error || "Failed to generate PDF");
+      }
 
-    const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
-      .map((node) => node.outerHTML)
-      .join("");
-
-    win.document.open();
-    win.document.write(
-      `<!doctype html><html><head><title>${formData.id} - Payslip</title>${styles}<style>body{margin:0;background:#fff;}</style></head><body>${html}</body></html>`
-    );
-    win.document.close();
-    return win;
-  };
-
-  const handleDownloadPayslip = () => {
-    const win = openPrintableWindow();
-    if (!win) return;
-    window.setTimeout(() => {
-      win.focus();
-      win.print();
-    }, 250);
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = downloadUrl;
+      anchor.download = `${formData.id || "payslip"}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(downloadUrl);
+    } catch (error) {
+      console.error("Failed to download payslip PDF:", error);
+    }
   };
 
   const handlePrintPayslip = () => {
