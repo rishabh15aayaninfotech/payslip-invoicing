@@ -1,25 +1,27 @@
+import Link from "next/link";
+
 const stats = [
-  { label: "Monthly revenue", value: "$42,880", change: "+12.4%" },
-  { label: "Pending invoices", value: "18", change: "+3 today" },
-  { label: "Active clients", value: "64", change: "+8 this quarter" },
-  { label: "Payroll batches", value: "7", change: "2 awaiting review" },
+  { label: "Total Payroll (Month)", value: "₹14,85,000", change: "+8.2%" },
+  { label: "Payslips Generated", value: "48 / 52", change: "4 pending" },
+  { label: "Active Employees", value: "52", change: "+3 this month" },
+  { label: "Tax & PF Deductions", value: "₹2,18,400", change: "Computed" },
 ];
 
 const recentActivity = [
-  "Invoice #2041 approved by finance",
-  "Payroll batch for April scheduled",
-  "New employee onboarded for Design",
-  "Overdue invoice reminder sent",
+  "April payslip generated for Engineering team (18 members)",
+  "Salary disbursement file exported for HDFC Bank",
+  "New employee onboarded: Aarav Mehta (Design)",
+  "Tax deduction statement updated for Q1",
 ];
 
-const invoices = [
-  { id: "INV-2041", client: "Northstar Labs", amount: "$8,400", status: "Paid" },
-  { id: "INV-2039", client: "Horizon Co.", amount: "$12,200", status: "Pending" },
-  { id: "INV-2037", client: "Vertex Studio", amount: "$6,750", status: "Review" },
-  { id: "INV-2032", client: "Apex Retail", amount: "$3,900", status: "Overdue" },
+const recentPayslips = [
+  { id: "PS-2026-0401", employee: "Rishabh Sharma", role: "Lead Fullstack", amount: "₹90,200", status: "Disbursed" },
+  { id: "PS-2026-0402", employee: "Aarav Mehta", role: "Sr UI Designer", amount: "₹63,200", status: "Generated" },
+  { id: "PS-2026-0403", employee: "Priya Sundaram", role: "Frontend Dev", amount: "₹57,600", status: "Disbursed" },
+  { id: "PS-2026-0404", employee: "Devendra Patel", role: "DevOps Eng", amount: "₹72,300", status: "Draft" },
 ];
 
-const bars = [32, 48, 40, 68, 52, 74, 61, 84];
+const bars = [42, 58, 45, 78, 62, 85, 70, 92];
 
 export default function DashboardPage() {
   return (
@@ -27,7 +29,7 @@ export default function DashboardPage() {
       <section className="grid gap-4 lg:grid-cols-[1.4fr_0.9fr]">
         <div className="rounded-[2rem] border border-white/10 bg-white/[0.05] p-6 shadow-[0_30px_120px_rgba(0,0,0,0.25)] backdrop-blur-2xl sm:p-8">
           <p className="text-sm font-medium tracking-[0.24em] text-white/40 uppercase">
-            Main dashboard
+            Admin Workspace
           </p>
           <div className="mt-4 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-2xl">
@@ -35,21 +37,23 @@ export default function DashboardPage() {
                 Welcome back, Rishabh
               </h1>
               <p className="mt-2 max-w-xl text-sm leading-6 text-white/65 sm:text-base">
-                Here is the current status for invoices, payroll, and admin
-                operations. This shell is ready for real data and backend logic.
+                Payroll, payslip generation, and employee salary records are up to date.
               </p>
             </div>
-            <div className="rounded-2xl border border-success/20 bg-success/10 px-4 py-3 text-sm text-success">
-              98.4% system uptime
-            </div>
+            <Link
+              href="/dashboard/payslip"
+              className="rounded-2xl bg-gradient-to-r from-accent to-accent-strong px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-accent/20 transition hover:brightness-110 active:scale-95 text-center"
+            >
+              Generate Payslip →
+            </Link>
           </div>
         </div>
 
         <div className="rounded-[2rem] border border-white/10 bg-surface/90 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.25)] backdrop-blur-2xl">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-white/55">Weekly trend</p>
-              <p className="mt-1 text-xl font-semibold text-white">Invoice volume</p>
+              <p className="text-sm text-white/55">Monthly trend</p>
+              <p className="mt-1 text-xl font-semibold text-white">Disbursement Volume</p>
             </div>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/60">
               Live
@@ -66,14 +70,14 @@ export default function DashboardPage() {
             ))}
           </div>
           <div className="mt-4 flex items-center justify-between text-xs text-white/45">
-            <span>Mon</span>
-            <span>Tue</span>
-            <span>Wed</span>
-            <span>Thu</span>
-            <span>Fri</span>
-            <span>Sat</span>
-            <span>Sun</span>
-            <span>Today</span>
+            <span>Sep</span>
+            <span>Oct</span>
+            <span>Nov</span>
+            <span>Dec</span>
+            <span>Jan</span>
+            <span>Feb</span>
+            <span>Mar</span>
+            <span>Apr</span>
           </div>
         </div>
       </section>
@@ -99,46 +103,47 @@ export default function DashboardPage() {
         <article className="rounded-[2rem] border border-white/10 bg-surface/90 p-6 shadow-[0_30px_120px_rgba(0,0,0,0.25)] backdrop-blur-2xl sm:p-7">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-white/55">Recent invoices</p>
+              <p className="text-sm text-white/55">Recent statements</p>
               <h2 className="mt-1 text-2xl font-semibold text-white">
-                Payment pipeline
+                Latest Payslips
               </h2>
             </div>
-            <button
-              type="button"
-              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70"
+            <Link
+              href="/dashboard/payslip"
+              className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70 hover:text-white transition"
             >
-              Export
-            </button>
+              View all
+            </Link>
           </div>
 
           <div className="mt-6 overflow-hidden rounded-[1.5rem] border border-white/10">
-            <div className="grid grid-cols-[1.2fr_1.5fr_0.8fr_0.8fr] gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 text-xs tracking-[0.18em] text-white/45 uppercase">
-              <span>Invoice</span>
-              <span>Client</span>
-              <span>Amount</span>
+            <div className="grid grid-cols-[1.1fr_1.4fr_1fr_0.8fr] gap-3 border-b border-white/10 bg-white/[0.04] px-4 py-3 text-xs tracking-[0.18em] text-white/45 uppercase">
+              <span>Slip ID</span>
+              <span>Employee</span>
+              <span>Net Pay</span>
               <span>Status</span>
             </div>
-            {invoices.map((invoice) => (
+            {recentPayslips.map((slip) => (
               <div
-                key={invoice.id}
-                className="grid grid-cols-[1.2fr_1.5fr_0.8fr_0.8fr] gap-3 border-b border-white/8 px-4 py-4 text-sm last:border-b-0"
+                key={slip.id}
+                className="grid grid-cols-[1.1fr_1.4fr_1fr_0.8fr] gap-3 border-b border-white/8 px-4 py-4 text-sm last:border-b-0 items-center"
               >
-                <span className="font-medium text-white">{invoice.id}</span>
-                <span className="text-white/70">{invoice.client}</span>
-                <span className="text-white/70">{invoice.amount}</span>
+                <span className="font-mono text-accent font-medium">{slip.id}</span>
+                <div>
+                  <p className="font-medium text-white">{slip.employee}</p>
+                  <p className="text-xs text-white/45">{slip.role}</p>
+                </div>
+                <span className="font-semibold text-white">{slip.amount}</span>
                 <span
-                  className={`w-fit rounded-full px-3 py-1 text-xs font-medium ${
-                    invoice.status === "Paid"
-                      ? "bg-success/10 text-success"
-                      : invoice.status === "Pending"
-                        ? "bg-warning/10 text-warning"
-                        : invoice.status === "Review"
-                          ? "bg-accent/10 text-accent"
-                          : "bg-danger/10 text-danger"
+                  className={`w-fit rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                    slip.status === "Disbursed"
+                      ? "bg-success/15 text-success"
+                      : slip.status === "Generated"
+                        ? "bg-accent/15 text-accent"
+                        : "bg-warning/15 text-warning"
                   }`}
                 >
-                  {invoice.status}
+                  {slip.status}
                 </span>
               </div>
             ))}
@@ -149,7 +154,7 @@ export default function DashboardPage() {
           <article className="rounded-[2rem] border border-white/10 bg-white/[0.05] p-6 shadow-lg shadow-black/10 backdrop-blur-xl">
             <p className="text-sm text-white/55">Activity feed</p>
             <h2 className="mt-1 text-2xl font-semibold text-white">
-              What changed today
+              Payroll Updates
             </h2>
             <div className="mt-5 space-y-3">
               {recentActivity.map((item, index) => (
@@ -167,24 +172,6 @@ export default function DashboardPage() {
                 </div>
               ))}
             </div>
-          </article>
-
-          <article className="rounded-[2rem] border border-white/10 bg-surface/90 p-6 shadow-lg shadow-black/10 backdrop-blur-xl">
-            <p className="text-sm text-white/55">Next steps</p>
-            <h2 className="mt-1 text-2xl font-semibold text-white">
-              Backend ready checklist
-            </h2>
-            <ul className="mt-5 space-y-3 text-sm text-white/70">
-              <li className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                Connect real auth and session handling
-              </li>
-              <li className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                Replace demo cards with API data
-              </li>
-              <li className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3">
-                Add invoice, employee, and payout routes
-              </li>
-            </ul>
           </article>
         </aside>
       </section>
