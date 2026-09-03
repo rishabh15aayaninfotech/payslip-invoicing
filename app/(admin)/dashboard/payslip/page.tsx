@@ -291,7 +291,7 @@ function numberToWordsINR(amount: number): string {
 export default function PayslipPage() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateType>("Corporate");
   const [formData, setFormData] = useState<PayslipData>(samplePresets[0]);
-  const [savedRecords, setSavedRecords] = useState<PayslipData[]>(samplePresets);
+  const [, setSavedRecords] = useState<PayslipData[]>(samplePresets);
   const [activeTab, setActiveTab] = useState<"Particulars" | "Salary" | "Settings">("Particulars");
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -368,17 +368,12 @@ export default function PayslipPage() {
       const res = await fetch("/api/payslips", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, templateLayout: selectedTemplate }),
+        body: JSON.stringify({ ...formData, templateLayout: selectedTemplate, forceNew: true }),
       });
       const data = await res.json();
       if (data.success && data.payslip) {
         const updated = data.payslip;
-        const exists = savedRecords.find((r) => r.id === updated.id);
-        if (exists) {
-          setSavedRecords(savedRecords.map((r) => (r.id === updated.id ? { ...updated } : r)));
-        } else {
-          setSavedRecords([updated, ...savedRecords]);
-        }
+        setSavedRecords((current) => [updated, ...current]);
         setSaveSuccess(true);
         setShowPostSaveActions(true);
         setTimeout(() => setSaveSuccess(false), 2500);

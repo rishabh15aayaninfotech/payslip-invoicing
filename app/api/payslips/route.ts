@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { connectToDatabase } from "@/lib/mongodb";
 import { Payslip } from "@/models/Payslip";
 
+function generateSlipId() {
+  const timestamp = new Date().toISOString().replace(/[-:TZ.]/g, "");
+  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `PS-${timestamp.slice(0, 8)}-${timestamp.slice(8, 12)}${suffix}`;
+}
+
 export async function GET() {
   try {
     await connectToDatabase();
@@ -26,13 +32,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const slipId = body.id || `PS-2026-${Date.now().toString().slice(-4)}`;
+    const forceNew = body.forceNew === true;
+    const slipId = forceNew ? generateSlipId() : body.id || generateSlipId();
 
-    const saved = await Payslip.findOneAndUpdate(
-      { id: slipId },
-      { $set: { ...body, id: slipId } },
-      { new: true, upsert: true }
-    );
+    const payload = { ...body };
+    delete payload.forceNew;
+
+    const saved = forceNew
+      ? await Payslip.create({ ...payload, id: slipId })
+      : await Payslip.findOneAndUpdate(
+          { id: slipId },
+          { $set: { ...payload, id: slipId } },
+          { new: true, upsert: true }
+        );
 
     return NextResponse.json({ success: true, payslip: saved });
   } catch (error: unknown) {
