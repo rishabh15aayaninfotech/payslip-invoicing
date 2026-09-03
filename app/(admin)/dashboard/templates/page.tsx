@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface TemplateConfig {
   id: string;
@@ -179,27 +179,66 @@ export default function PayslipTemplatesPage() {
   const [previewTemplate, setPreviewTemplate] = useState<TemplateConfig | null>(null);
   const [editingTemplate, setEditingTemplate] = useState<TemplateConfig | null>(null);
 
+  // Load from MongoDB on mount
+  useEffect(() => {
+    async function loadTemplates() {
+      try {
+        const res = await fetch("/api/templates");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.templates) && data.templates.length > 0) {
+          setTemplates(data.templates);
+        }
+      } catch (err) {
+        console.error("Failed to fetch templates from MongoDB:", err);
+      }
+    }
+    loadTemplates();
+  }, []);
+
   const filteredTemplates = templates.filter((tpl) => {
     if (activeFilter === "Active") return tpl.isActive;
     if (activeFilter === "Inactive") return !tpl.isActive;
     return true;
   });
 
+  const persistTemplateUpdate = async (updatePayload: {
+    id: string;
+    isActive?: boolean;
+    isDefault?: boolean;
+    fields?: TemplateConfig["fields"];
+    notes?: string;
+  }) => {
+    try {
+      await fetch("/api/templates", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatePayload),
+      });
+    } catch (err) {
+      console.error("Failed to persist template update:", err);
+    }
+  };
+
   const toggleActive = (id: string) => {
+    let nextActive = false;
+    let nextDefault = false;
+
     setTemplates((prev) =>
       prev.map((tpl) => {
         if (tpl.id === id) {
-          const nextActive = !tpl.isActive;
+          nextActive = !tpl.isActive;
+          nextDefault = nextActive ? tpl.isDefault : false;
           return {
             ...tpl,
             isActive: nextActive,
-            // If we deactivate the default template, default becomes false
-            isDefault: nextActive ? tpl.isDefault : false,
+            isDefault: nextDefault,
           };
         }
         return tpl;
       })
     );
+
+    persistTemplateUpdate({ id, isActive: nextActive, isDefault: nextDefault });
   };
 
   const setDefaultTemplate = (id: string) => {
@@ -207,9 +246,11 @@ export default function PayslipTemplatesPage() {
       prev.map((tpl) => ({
         ...tpl,
         isDefault: tpl.id === id,
-        isActive: tpl.id === id ? true : tpl.isActive, // activating if default
+        isActive: tpl.id === id ? true : tpl.isActive,
       }))
     );
+
+    persistTemplateUpdate({ id, isDefault: true, isActive: true });
   };
 
   const handleUpdateField = (
@@ -228,6 +269,7 @@ export default function PayslipTemplatesPage() {
     setTemplates((prev) =>
       prev.map((t) => (t.id === updated.id ? updated : t))
     );
+    persistTemplateUpdate({ id: updated.id, fields: updated.fields });
     if (previewTemplate?.id === updated.id) {
       setPreviewTemplate(updated);
     }
@@ -240,6 +282,7 @@ export default function PayslipTemplatesPage() {
     setTemplates((prev) =>
       prev.map((t) => (t.id === updated.id ? updated : t))
     );
+    persistTemplateUpdate({ id: updated.id, notes: updated.notes });
     if (previewTemplate?.id === updated.id) {
       setPreviewTemplate(updated);
     }

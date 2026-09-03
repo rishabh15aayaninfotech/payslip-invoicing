@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 type TemplateType = "Corporate" | "Minimal" | "Executive" | "Startup";
 
@@ -294,11 +294,28 @@ export default function PayslipPage() {
   const [savedRecords, setSavedRecords] = useState<PayslipData[]>(samplePresets);
   const [activeTab, setActiveTab] = useState<"Particulars" | "Salary" | "Settings">("Particulars");
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  // Load from MongoDB on mount
+  useEffect(() => {
+    async function loadPayslips() {
+      try {
+        const res = await fetch("/api/payslips");
+        const data = await res.json();
+        if (data.success && Array.isArray(data.payslips) && data.payslips.length > 0) {
+          setSavedRecords(data.payslips);
+        }
+      } catch (err) {
+        console.error("Failed to fetch payslips from MongoDB:", err);
+      }
+    }
+    loadPayslips();
+  }, []);
 
   const { gross, deductions, net } = calculateTotals(formData);
 
   const handlePresetSelect = (empId: string) => {
-    const found = samplePresets.find((p) => p.id === empId);
+    const found = savedRecords.find((p) => p.id === empId) || samplePresets.find((p) => p.id === empId);
     if (found) {
       setFormData({ ...found });
     } else {
@@ -323,15 +340,31 @@ export default function PayslipPage() {
     }
   };
 
-  const handleSaveRecord = () => {
-    const exists = savedRecords.find((r) => r.id === formData.id);
-    if (exists) {
-      setSavedRecords(savedRecords.map((r) => (r.id === formData.id ? { ...formData } : r)));
-    } else {
-      setSavedRecords([formData, ...savedRecords]);
+  const handleSaveRecord = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/payslips", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, templateLayout: selectedTemplate }),
+      });
+      const data = await res.json();
+      if (data.success && data.payslip) {
+        const updated = data.payslip;
+        const exists = savedRecords.find((r) => r.id === updated.id);
+        if (exists) {
+          setSavedRecords(savedRecords.map((r) => (r.id === updated.id ? { ...updated } : r)));
+        } else {
+          setSavedRecords([updated, ...savedRecords]);
+        }
+        setSaveSuccess(true);
+        setTimeout(() => setSaveSuccess(false), 2500);
+      }
+    } catch (err) {
+      console.error("Failed to save payslip to MongoDB:", err);
+    } finally {
+      setSaving(false);
     }
-    setSaveSuccess(true);
-    setTimeout(() => setSaveSuccess(false), 2000);
   };
 
   return (
@@ -361,9 +394,9 @@ export default function PayslipPage() {
               onChange={(e) => handlePresetSelect(e.target.value)}
               className="bg-transparent text-xs font-medium text-white outline-none cursor-pointer"
             >
-              {samplePresets.map((p) => (
+              {savedRecords.map((p) => (
                 <option key={p.id} value={p.id} className="bg-surface text-white">
-                  {p.empName} ({p.empCode})
+                  {p.empName || "Draft Employee"} ({p.empCode})
                 </option>
               ))}
               <option value="NEW" className="bg-surface text-white">+ New Employee Form</option>
@@ -372,10 +405,11 @@ export default function PayslipPage() {
 
           <button
             type="button"
+            disabled={saving}
             onClick={handleSaveRecord}
-            className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white transition"
+            className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-white/80 hover:bg-white/10 hover:text-white transition disabled:opacity-50"
           >
-            {saveSuccess ? "✓ Saved" : "Save Record"}
+            {saving ? "Saving to DB..." : saveSuccess ? "✓ Saved to DB" : "Save to DB"}
           </button>
 
           <button
