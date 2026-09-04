@@ -111,19 +111,23 @@ export function AdminShell({ children }: { children: ReactNode }) {
                 href={item.href}
                 title={isCollapsed ? item.label : undefined}
                 onClick={() => setMobileOpen(false)}
-                className={`group flex items-center rounded-2xl transition-all duration-200 ${isCollapsed
+                className={`group relative flex items-center rounded-2xl border transition-all duration-200 ${isCollapsed
                   ? "justify-center p-3"
                   : "gap-3.5 px-3.5 py-3"
-                  } ${active
-                    ? "bg-white text-slate-950 font-medium shadow-lg shadow-white/10"
-                    : "text-white/70 hover:bg-white/[0.06] hover:text-white"
-                  }`}
+                  } ${
+                  active
+                    ? "border-accent/20 bg-accent/12 text-foreground font-medium shadow-sm shadow-accent/10"
+                    : "border-transparent text-foreground/70 hover:border-border hover:bg-surface-soft hover:text-foreground"
+                }`}
               >
-                <span className={`${active ? "text-slate-950" : "text-white/60 group-hover:text-white"}`}>
+                {active && (
+                  <span className="absolute inset-y-2 left-1 w-1 rounded-full bg-accent" />
+                )}
+                <span className={`${active ? "text-accent" : "text-muted group-hover:text-foreground"}`}>
                   {item.icon}
                 </span>
                 {!isCollapsed && (
-                  <span className="text-sm overflow-hidden whitespace-nowrap">
+                  <span className={`text-sm overflow-hidden whitespace-nowrap ${active ? "pl-1" : ""}`}>
                     {item.label}
                   </span>
                 )}
@@ -250,42 +254,6 @@ export function AdminShell({ children }: { children: ReactNode }) {
                       <p className="text-xs font-semibold text-white truncate">Rishabh Chandra</p>
                       <p className="text-[11px] text-white/50 truncate">admin@payslip.in</p>
                     </div>
-                  </div>
-
-                  {/* Navigation Links */}
-                  <div className="py-1.5 space-y-0.5 text-xs">
-                    <Link
-                      href="/dashboard/templates"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-white/70 hover:bg-white/5 hover:text-white transition"
-                    >
-                      <svg className="h-4 w-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                      </svg>
-                      Templates
-                    </Link>
-
-                    <Link
-                      href="/dashboard/payslip"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-white/70 hover:bg-white/5 hover:text-white transition"
-                    >
-                      <svg className="h-4 w-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 5a.5.5 0 11-1 0 .5.5 0 011 0z" />
-                      </svg>
-                      Payslip Studio
-                    </Link>
-
-                    <Link
-                      href="/dashboard/templates"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="flex items-center gap-2 rounded-xl px-3 py-2 text-white/70 hover:bg-white/5 hover:text-white transition"
-                    >
-                      <svg className="h-4 w-4 text-white/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
-                      </svg>
-                      Templates
-                    </Link>
                   </div>
 
                   {/* Sign Out Action */}
