@@ -31,7 +31,7 @@ export function LoginForm() {
         return;
       }
 
-      router.push("/dashboard");
+      router.push("/dashboard/templates");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Network error. Please try again.";
       setErrorMessage(msg);
