@@ -18,7 +18,7 @@ export async function PUT(request: Request) {
   try {
     await connectToDatabase();
     const body = await request.json();
-    const { id, isActive, isDefault, fields, notes } = body;
+    const { id } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -28,15 +28,12 @@ export async function PUT(request: Request) {
     }
 
     // If setting as default, unset other defaults
-    if (isDefault) {
+    if (body.isDefault === true) {
       await Template.updateMany({ id: { $ne: id } }, { $set: { isDefault: false } });
     }
 
-    const updateData: Record<string, unknown> = {};
-    if (typeof isActive === "boolean") updateData.isActive = isActive;
-    if (typeof isDefault === "boolean") updateData.isDefault = isDefault;
-    if (fields) updateData.fields = fields;
-    if (typeof notes === "string") updateData.notes = notes;
+    const updateData: Record<string, unknown> = { ...body };
+    delete updateData.id;
 
     const updated = await Template.findOneAndUpdate(
       { id },

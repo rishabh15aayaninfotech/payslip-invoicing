@@ -186,7 +186,27 @@ export default function PayslipTemplatesPage() {
         const res = await fetch("/api/templates");
         const data = await res.json();
         if (data.success && Array.isArray(data.templates) && data.templates.length > 0) {
-          setTemplates(data.templates);
+          setTemplates((current) => {
+            const byId = new Map<string, TemplateConfig>();
+
+            current.forEach((template) => {
+              byId.set(template.id, template);
+            });
+
+            data.templates.forEach((template: Partial<TemplateConfig> & { id: string }) => {
+              const base = byId.get(template.id) ?? (template as TemplateConfig);
+              byId.set(template.id, {
+                ...base,
+                ...template,
+                fields: {
+                  ...base.fields,
+                  ...(template.fields || {}),
+                },
+              });
+            });
+
+            return Array.from(byId.values());
+          });
         }
       } catch (err) {
         console.error("Failed to fetch templates from MongoDB:", err);
@@ -201,56 +221,58 @@ export default function PayslipTemplatesPage() {
     return true;
   });
 
-  const persistTemplateUpdate = async (updatePayload: {
-    id: string;
-    isActive?: boolean;
-    isDefault?: boolean;
-    fields?: TemplateConfig["fields"];
-    notes?: string;
-  }) => {
+  const persistTemplateUpdate = async (template: TemplateConfig) => {
     try {
-      await fetch("/api/templates", {
+      const res = await fetch("/api/templates", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatePayload),
+        body: JSON.stringify(template),
       });
+
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.error || "Failed to persist template update");
+      }
     } catch (err) {
       console.error("Failed to persist template update:", err);
     }
   };
 
   const toggleActive = (id: string) => {
-    let nextActive = false;
-    let nextDefault = false;
+    const current = templates.find((tpl) => tpl.id === id);
+    if (!current) return;
 
-    setTemplates((prev) =>
-      prev.map((tpl) => {
-        if (tpl.id === id) {
-          nextActive = !tpl.isActive;
-          nextDefault = nextActive ? tpl.isDefault : false;
-          return {
-            ...tpl,
-            isActive: nextActive,
-            isDefault: nextDefault,
-          };
-        }
-        return tpl;
-      })
-    );
+    const updated = {
+      ...current,
+      isActive: !current.isActive,
+      isDefault: !current.isActive ? current.isDefault : false,
+    };
 
-    persistTemplateUpdate({ id, isActive: nextActive, isDefault: nextDefault });
+    setTemplates((prev) => prev.map((tpl) => (tpl.id === id ? updated : tpl)));
+    void persistTemplateUpdate(updated);
   };
 
   const setDefaultTemplate = (id: string) => {
+    const selected = templates.find((tpl) => tpl.id === id);
+    if (!selected) return;
+
     setTemplates((prev) =>
-      prev.map((tpl) => ({
-        ...tpl,
-        isDefault: tpl.id === id,
-        isActive: tpl.id === id ? true : tpl.isActive,
-      }))
+      prev.map((tpl) => {
+        const updated = {
+          ...tpl,
+          isDefault: tpl.id === id,
+          isActive: tpl.id === id ? true : tpl.isActive,
+        };
+
+        return updated;
+      })
     );
 
-    persistTemplateUpdate({ id, isDefault: true, isActive: true });
+    void persistTemplateUpdate({
+      ...selected,
+      isActive: true,
+      isDefault: true,
+    });
   };
 
   const handleUpdateField = (
@@ -269,7 +291,7 @@ export default function PayslipTemplatesPage() {
     setTemplates((prev) =>
       prev.map((t) => (t.id === updated.id ? updated : t))
     );
-    persistTemplateUpdate({ id: updated.id, fields: updated.fields });
+    void persistTemplateUpdate(updated);
     if (previewTemplate?.id === updated.id) {
       setPreviewTemplate(updated);
     }
@@ -282,7 +304,7 @@ export default function PayslipTemplatesPage() {
     setTemplates((prev) =>
       prev.map((t) => (t.id === updated.id ? updated : t))
     );
-    persistTemplateUpdate({ id: updated.id, notes: updated.notes });
+    void persistTemplateUpdate(updated);
     if (previewTemplate?.id === updated.id) {
       setPreviewTemplate(updated);
     }
