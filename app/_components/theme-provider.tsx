@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 export type ThemeMode = "light" | "dark";
 
@@ -21,27 +28,26 @@ function applyTheme(theme: ThemeMode) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<ThemeMode>(() => {
-    if (typeof document !== "undefined") {
-      const themeFromDocument = document.documentElement.dataset.theme;
-      if (themeFromDocument === "light" || themeFromDocument === "dark") {
-        return themeFromDocument;
-      }
+  const [theme, setThemeState] = useState<ThemeMode>("dark");
+
+  useLayoutEffect(() => {
+    const themeFromDocument = document.documentElement.dataset.theme;
+    if (themeFromDocument === "light" || themeFromDocument === "dark") {
+      setThemeState(themeFromDocument);
+      applyTheme(themeFromDocument);
+      return;
     }
 
-    if (typeof window !== "undefined") {
-      try {
-        const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
-        if (storedTheme === "light" || storedTheme === "dark") {
-          return storedTheme;
-        }
-      } catch {
-        // Ignore storage failures and fall back to dark.
+    try {
+      const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+      if (storedTheme === "light" || storedTheme === "dark") {
+        setThemeState(storedTheme);
+        applyTheme(storedTheme);
       }
+    } catch {
+      // Ignore storage errors in private browsing or restricted contexts.
     }
-
-    return "dark";
-  });
+  }, []);
 
   useEffect(() => {
     try {
