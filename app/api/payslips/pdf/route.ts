@@ -1,12 +1,14 @@
 import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
+import { buildVolkswagenDocument, type VwPayslipData } from "@/lib/volkswagen-payslip";
 
 export const runtime = "nodejs";
 
-type TemplateLayout = "Corporate" | "Minimal" | "Executive" | "Startup";
+type TemplateLayout = "Corporate" | "Minimal" | "Executive" | "Volkswagen";
 
 interface PayslipPdfPayload {
   templateLayout?: TemplateLayout;
+  vwData?: Partial<VwPayslipData>;
   formData?: {
     id: string;
     companyName: string;
@@ -119,8 +121,6 @@ function getTheme(layout: TemplateLayout) {
       return { accent: "#64748b", line: "#1f2937", bg: "#ffffff", muted: "#475569" };
     case "Executive":
       return { accent: "#059669", line: "#065f46", bg: "#ffffff", muted: "#475569" };
-    case "Startup":
-      return { accent: "#7c3aed", line: "#6d28d9", bg: "#ffffff", muted: "#475569" };
     case "Corporate":
     default:
       return { accent: "#2563eb", line: "#1d4ed8", bg: "#ffffff", muted: "#475569" };
@@ -390,7 +390,10 @@ export async function POST(request: Request) {
     }
 
     const layout = body.templateLayout || "Corporate";
-    const html = buildHtml(body.formData, layout);
+    const html =
+      layout === "Volkswagen"
+        ? buildVolkswagenDocument(body.vwData)
+        : buildHtml(body.formData, layout);
 
     const browser = await puppeteer.launch({
       headless: true,

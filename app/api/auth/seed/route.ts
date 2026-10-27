@@ -88,31 +88,20 @@ export const initialTemplatesSeed = [
       "Official executive statement. Tax deducted at source as per Income Tax Act provisions.",
   },
   {
-    id: "tpl-startup-indigo",
-    name: "Tech Startup",
-    category: "Modern SaaS & Creative",
-    description:
-      "Vibrant card-based earnings & deductions structure with verification QR seal, modern rounded tags, and gradient banners.",
-    themeColor: "#8b5cf6",
-    themeGradient: "from-indigo-500 via-purple-500 to-pink-500",
-    accentBg: "bg-purple-500/10",
-    accentText: "text-purple-400",
-    accentBorder: "border-purple-500/30",
+    id: "tpl-volkswagen",
+    name: "Volkswagen Payslip",
+    category: "German Payroll",
+    description: "Volkswagen-style German monthly payroll statement with editable highlighted fields.",
+    themeColor: "#111827",
+    themeGradient: "from-slate-800 to-slate-950",
+    accentBg: "bg-slate-500/10",
+    accentText: "text-slate-300",
+    accentBorder: "border-slate-500/30",
     isActive: true,
     isDefault: false,
-    layout: "Startup",
-    fields: {
-      showLogo: true,
-      showCompanyAddress: true,
-      showPanUan: true,
-      showBankDetails: true,
-      showAttendance: true,
-      showAmountInWords: true,
-      showSignatory: false,
-      showQrCode: true,
-    },
-    notes:
-      "Digitally verified payslip issued through Payslip Pro platform.",
+    layout: "Volkswagen",
+    fields: { showLogo: true, showCompanyAddress: true, showPanUan: true, showBankDetails: true, showAttendance: true, showAmountInWords: false, showSignatory: false, showQrCode: false },
+    notes: "Volkswagen-style payroll template. Yellow-highlighted values are data-driven.",
   },
 ];
 
@@ -205,6 +194,9 @@ export async function seedDatabaseIfEmpty() {
   );
 
   // 2. Seed Templates
+  await Template.deleteMany({
+    layout: { $nin: ["Corporate", "Minimal", "Executive", "Volkswagen"] },
+  });
   const templateCount = await Template.countDocuments();
   if (templateCount === 0) {
     await Template.insertMany(initialTemplatesSeed);

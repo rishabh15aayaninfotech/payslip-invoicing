@@ -12,7 +12,7 @@ export interface ITemplate extends Document {
   accentBorder: string;
   isActive: boolean;
   isDefault: boolean;
-  layout: "Corporate" | "Minimal" | "Executive" | "Startup";
+  layout: "Corporate" | "Minimal" | "Executive" | "Volkswagen";
   fields: {
     showLogo: boolean;
     showCompanyAddress: boolean;
@@ -43,7 +43,7 @@ const TemplateSchema = new Schema<ITemplate>(
     isDefault: { type: Boolean, default: false },
     layout: {
       type: String,
-      enum: ["Corporate", "Minimal", "Executive", "Startup"],
+      enum: ["Corporate", "Minimal", "Executive", "Volkswagen"],
       default: "Corporate",
     },
     fields: {

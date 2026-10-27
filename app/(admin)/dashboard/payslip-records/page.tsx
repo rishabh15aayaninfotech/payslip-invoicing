@@ -2,6 +2,13 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import {
+  buildVolkswagenFragment,
+  calculateVwTotals,
+  euro,
+  normalizeVwData,
+  type VwPayslipData,
+} from "@/lib/volkswagen-payslip";
 
 type PayslipStatus = "Disbursed" | "Generated" | "Draft";
 
@@ -49,6 +56,7 @@ interface PayslipRecord {
   notes: string;
   status: PayslipStatus;
   templateLayout?: string;
+  vwData?: Partial<VwPayslipData>;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -77,6 +85,22 @@ function calculateTotals(record: PayslipRecord) {
     deductions,
     net: gross - deductions,
   };
+}
+
+function isVolkswagen(record: PayslipRecord) {
+  return record.templateLayout === "Volkswagen";
+}
+
+function formatPeriod(record: PayslipRecord) {
+  if (isVolkswagen(record)) return normalizeVwData(record.vwData).abrechnungsmonat;
+  return `${record.month} ${record.year}`;
+}
+
+function formatNet(record: PayslipRecord) {
+  if (isVolkswagen(record)) {
+    return `€${euro(calculateVwTotals(normalizeVwData(record.vwData)).auszahlung)}`;
+  }
+  return `₹${money(calculateTotals(record).net)}`;
 }
 
 function formatDate(value?: string) {
@@ -111,6 +135,39 @@ export default function PayslipRecordsPage() {
   const [statusFilter, setStatusFilter] = useState<"All" | PayslipStatus>("All");
   const [templateFilter, setTemplateFilter] = useState("All");
   const [selectedRecord, setSelectedRecord] = useState<PayslipRecord | null>(null);
+  const [downloading, setDownloading] = useState(false);
+
+  const handleDownload = async (record: PayslipRecord) => {
+    setDownloading(true);
+    try {
+      const res = await fetch("/api/payslips/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          formData: record,
+          templateLayout: record.templateLayout || "Corporate",
+          vwData: record.vwData,
+        }),
+      });
+      if (!res.ok) {
+        const payload = await res.json().catch(() => null);
+        throw new Error(payload?.error || "Failed to generate PDF");
+      }
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = `${record.id || "payslip"}.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to download payslip PDF:", err);
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   useEffect(() => {
     async function loadRecords() {
@@ -150,6 +207,9 @@ export default function PayslipRecordsPage() {
         record.year,
         record.companyName,
         record.email,
+        ...(isVolkswagen(record)
+          ? [record.vwData?.abrechnungsmonat, record.vwData?.abteilung, record.vwData?.steuerId]
+          : []),
       ]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(searchTerm));
@@ -293,8 +353,6 @@ export default function PayslipRecordsPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {filteredRecords.map((record) => {
-                  const totals = calculateTotals(record);
-
                   return (
                     <tr key={record._id || record.id} className="transition hover:bg-white/[0.03]">
                       <td className="px-4 py-4 font-mono text-accent">{record.id}</td>
@@ -302,14 +360,14 @@ export default function PayslipRecordsPage() {
                         <div className="space-y-1">
                           <p className="font-semibold text-white">{record.empName}</p>
                           <p className="text-[11px] text-white/45">
-                            {record.empCode} · {record.designation}
+                            {record.empCode} · {isVolkswagen(record) ? record.vwData?.abteilung : record.designation}
                           </p>
                         </div>
                       </td>
                       <td className="px-4 py-4 text-white/70">
-                        {record.month} {record.year}
+                        {formatPeriod(record)}
                       </td>
-                      <td className="px-4 py-4 font-semibold text-white">₹{money(totals.net)}</td>
+                      <td className="px-4 py-4 font-semibold text-white">{formatNet(record)}</td>
                       <td className="px-4 py-4">
                         <span
                           className={`inline-flex items-center rounded-full px-2.5 py-1 text-[11px] font-medium ${
@@ -354,9 +412,20 @@ export default function PayslipRecordsPage() {
                   {selectedRecord.empName} · {selectedRecord.id}
                 </h2>
                 <p className="text-sm text-white/55">
-                  {selectedRecord.designation} · {selectedRecord.department} · {selectedRecord.templateLayout || "Corporate"}
+                  {isVolkswagen(selectedRecord)
+                    ? `${formatPeriod(selectedRecord)} · ${selectedRecord.vwData?.abteilung ?? ""} · Volkswagen`
+                    : `${selectedRecord.designation} · ${selectedRecord.department} · ${selectedRecord.templateLayout || "Corporate"}`}
                 </p>
               </div>
+              <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={downloading}
+                onClick={() => handleDownload(selectedRecord)}
+                className="rounded-xl bg-gradient-to-r from-accent to-accent-strong px-3 py-2 text-xs font-semibold text-white shadow-md shadow-accent/20 transition hover:brightness-110 disabled:opacity-50"
+              >
+                {downloading ? "Generating..." : "Download PDF"}
+              </button>
               <button
                 type="button"
                 onClick={() => setSelectedRecord(null)}
@@ -366,9 +435,46 @@ export default function PayslipRecordsPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
+              </div>
             </div>
 
             <div className="max-h-[calc(92vh-78px)] overflow-y-auto px-6 py-5">
+              {isVolkswagen(selectedRecord) ? (
+                (() => {
+                  const vw = normalizeVwData(selectedRecord.vwData);
+                  const totals = calculateVwTotals(vw);
+                  return (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-2 text-xs text-white/70 sm:grid-cols-4">
+                        <div className="rounded-xl border border-emerald-500/20 bg-emerald-500/5 p-3">
+                          <p className="text-[11px] text-white/45">Gesamtbrutto</p>
+                          <p className="mt-1 font-semibold text-white">€{euro(vw.gesamtbrutto)}</p>
+                        </div>
+                        <div className="rounded-xl border border-pink-500/20 bg-pink-500/5 p-3">
+                          <p className="text-[11px] text-white/45">Steuern + SV</p>
+                          <p className="mt-1 font-semibold text-white">€{euro(totals.summeSteuern + totals.summeSv)}</p>
+                        </div>
+                        <div className="rounded-xl border border-white/10 bg-white/5 p-3">
+                          <p className="text-[11px] text-white/45">Nettoentgelt</p>
+                          <p className="mt-1 font-semibold text-white">€{euro(totals.netto)}</p>
+                        </div>
+                        <div className="rounded-xl border border-accent/20 bg-accent/5 p-3">
+                          <p className="text-[11px] text-white/45">Auszahlungsbetrag</p>
+                          <p className="mt-1 font-semibold text-white">€{euro(totals.auszahlung)}</p>
+                        </div>
+                      </div>
+                      <p className="text-[11px] text-white/45">
+                        Created: {formatDate(selectedRecord.createdAt)} · Status: {selectedRecord.status}
+                      </p>
+                      <div
+                        className="overflow-x-auto rounded-2xl bg-white"
+                        dangerouslySetInnerHTML={{ __html: buildVolkswagenFragment(vw) }}
+                      />
+                    </div>
+                  );
+                })()
+              ) : (
+              <>
               <div className="grid gap-4 lg:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
                   <h3 className="text-sm font-semibold text-white">Summary</h3>
@@ -495,6 +601,8 @@ export default function PayslipRecordsPage() {
                 <h3 className="text-sm font-semibold text-white">Notes</h3>
                 <p className="mt-2 text-xs leading-6 text-white/70">{selectedRecord.notes || "—"}</p>
               </div>
+              </>
+              )}
             </div>
           </div>
         </div>

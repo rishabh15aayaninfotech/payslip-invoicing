@@ -46,6 +46,7 @@ export interface IPayslip extends Document {
   notes: string;
   status: "Disbursed" | "Generated" | "Draft";
   templateLayout: string;
+  vwData?: Record<string, unknown>;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -100,7 +101,8 @@ const PayslipSchema = new Schema<IPayslip>(
       enum: ["Disbursed", "Generated", "Draft"],
       default: "Generated",
     },
-    templateLayout: { type: String, default: "Corporate" },
+    templateLayout: { type: String, enum: ["Corporate", "Minimal", "Executive", "Volkswagen"], default: "Corporate" },
+    vwData: { type: Schema.Types.Mixed, default: undefined },
   },
   {
     timestamps: true,

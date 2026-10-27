@@ -6,7 +6,14 @@ export async function GET() {
   try {
     await connectToDatabase();
 
-    const templates = await Template.find({}).sort({ isDefault: -1, createdAt: 1 });
+    // Remove legacy templates that are no longer supported before reading the list.
+    await Template.deleteMany({
+      layout: { $nin: ["Corporate", "Minimal", "Executive", "Volkswagen"] },
+    });
+
+    const templates = await Template.find({
+      layout: { $in: ["Corporate", "Minimal", "Executive", "Volkswagen"] },
+    }).sort({ isDefault: -1, createdAt: 1 });
     return NextResponse.json({ success: true, templates });
   } catch (error: unknown) {
     const errorMessage = error instanceof Error ? error.message : "Error fetching templates";

@@ -1,8 +1,17 @@
 ﻿"use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type FocusEvent } from "react";
+import {
+  buildVolkswagenFragment,
+  defaultVwPayslipData,
+  isVwNumberField,
+  parseGermanNumber,
+  vwFieldGroups,
+  type VwFieldKey,
+  type VwPayslipData,
+} from "@/lib/volkswagen-payslip";
 
-type TemplateType = "Corporate" | "Minimal" | "Executive" | "Startup";
+type TemplateType = "Corporate" | "Minimal" | "Executive" | "Volkswagen";
 
 interface TemplateOption {
   id: TemplateType;
@@ -35,11 +44,11 @@ const templateOptions: TemplateOption[] = [
     accentClass: "border-emerald-500 bg-emerald-500/10 text-emerald-400",
   },
   {
-    id: "Startup",
-    name: "Tech Startup",
-    badge: "Purple Gradient",
-    color: "#7c3aed",
-    accentClass: "border-purple-500 bg-purple-500/10 text-purple-400",
+    id: "Volkswagen",
+    name: "Volkswagen Payslip",
+    badge: "German Payroll",
+    color: "#111827",
+    accentClass: "border-slate-500 bg-slate-500/10 text-slate-200",
   },
 ];
 
@@ -298,6 +307,23 @@ export default function PayslipPage() {
   const [showPostSaveActions, setShowPostSaveActions] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewMarkup, setPreviewMarkup] = useState("");
+  const [vwData, setVwData] = useState<VwPayslipData>(defaultVwPayslipData);
+  const isVolkswagen = selectedTemplate === "Volkswagen";
+
+  const updateVwField = (key: VwFieldKey, raw: string) => {
+    setVwData((current) => ({
+      ...current,
+      [key]: isVwNumberField(key) ? parseGermanNumber(raw) : raw,
+    }));
+  };
+
+  // Highlighted fields on the Volkswagen sheet are contentEditable; commit on blur.
+  const handleVwInlineEdit = (e: FocusEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const key = target.dataset.vwField as VwFieldKey | undefined;
+    if (!key) return;
+    updateVwField(key, target.innerText.replace(/\s+/g, " ").trim());
+  };
 
   // Load from MongoDB on mount
   useEffect(() => {
@@ -336,6 +362,7 @@ export default function PayslipPage() {
         body: JSON.stringify({
           formData,
           templateLayout: selectedTemplate,
+          vwData: isVolkswagen ? vwData : undefined,
         }),
       });
 
@@ -368,7 +395,18 @@ export default function PayslipPage() {
       const res = await fetch("/api/payslips", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, templateLayout: selectedTemplate, forceNew: true }),
+        body: JSON.stringify({
+          ...formData,
+          ...(isVolkswagen
+            ? {
+                empName: vwData.name,
+                empCode: vwData.personalnummer,
+                vwData,
+              }
+            : {}),
+          templateLayout: selectedTemplate,
+          forceNew: true,
+        }),
       });
       const data = await res.json();
       if (data.success && data.payslip) {
@@ -498,8 +536,60 @@ export default function PayslipPage() {
             </div>
           </div>
 
+          {/* 2a. Volkswagen-specific fields (yellow = highlighted on the sheet) */}
+          {isVolkswagen && (
+            <div className="rounded-2xl border border-white/10 bg-surface/90 p-4 shadow-lg backdrop-blur-xl text-xs">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] font-semibold text-white/50 uppercase tracking-wider">
+                  Volkswagen Felder
+                </p>
+                <label className="flex items-center gap-1.5 text-[11px] text-white/60 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={vwData.highlight}
+                    onChange={(e) => setVwData({ ...vwData, highlight: e.target.checked })}
+                    className="h-3.5 w-3.5 accent-accent"
+                  />
+                  Gelbe Markierung anzeigen
+                </label>
+              </div>
+              <p className="mt-1 text-[10px] text-white/40">
+                Tip: highlighted values can also be edited by clicking directly on the payslip.
+              </p>
+
+              <div className="mt-3 max-h-[60vh] space-y-4 overflow-y-auto pr-1">
+                {vwFieldGroups.map((group) => (
+                  <div key={group.title} className="space-y-2">
+                    <p className="text-[11px] font-semibold text-white/60">{group.title}</p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {group.fields.map((field) => (
+                        <label key={field.key} className="space-y-1">
+                          <span className="flex items-center gap-1 text-[10px] text-white/50">
+                            {field.highlighted && (
+                              <span className="h-1.5 w-1.5 rounded-full bg-yellow-300" />
+                            )}
+                            {field.label}
+                          </span>
+                          <input
+                            type={field.type === "number" ? "number" : "text"}
+                            step={field.type === "number" ? "0.01" : undefined}
+                            value={String(vwData[field.key] ?? "")}
+                            onChange={(e) => updateVwField(field.key, e.target.value)}
+                            className={`w-full rounded-lg border bg-white/5 px-2.5 py-1.5 text-xs text-white outline-none focus:border-accent/60 ${
+                              field.highlighted ? "border-yellow-300/30" : "border-white/10"
+                            }`}
+                          />
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* 2. Input Particulars & Tabs */}
-          <div className="rounded-2xl border border-white/10 bg-surface/90 p-4 shadow-lg backdrop-blur-xl">
+          <div className={`rounded-2xl border border-white/10 bg-surface/90 p-4 shadow-lg backdrop-blur-xl ${isVolkswagen ? "hidden" : ""}`}>
             {/* Segmented Tab Controls */}
             <div className="flex items-center rounded-xl bg-white/5 p-1 text-xs">
               {(["Particulars", "Salary", "Settings"] as const).map((tab) => (
@@ -821,7 +911,9 @@ export default function PayslipPage() {
           {/* Document Sheet Canvas */}
           <div
             id="printable-payslip"
-            className="rounded-2xl border border-slate-700 bg-[#ffffff] text-[#0f172a] p-6 sm:p-8 shadow-2xl transition-all duration-200 min-h-[580px]"
+            className={`rounded-2xl border border-slate-700 bg-[#ffffff] text-[#0f172a] shadow-2xl transition-all duration-200 min-h-[580px] ${
+              isVolkswagen ? "overflow-hidden p-0" : "p-6 sm:p-8"
+            }`}
           >
             {/* ------------------------------------------------------------- */}
             {/* 1. CORPORATE CLASSIC (Clean White Paper & Crisp Navy Ink)     */}
@@ -1082,6 +1174,20 @@ export default function PayslipPage() {
               </div>
             )}
 
+            {selectedTemplate === "Volkswagen" && (
+              <div
+                className="overflow-x-auto"
+                onBlur={handleVwInlineEdit}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.target as HTMLElement).dataset.vwField) {
+                    e.preventDefault();
+                    (e.target as HTMLElement).blur();
+                  }
+                }}
+                dangerouslySetInnerHTML={{ __html: buildVolkswagenFragment(vwData, { editable: true }) }}
+              />
+            )}
+
             {/* ------------------------------------------------------------- */}
             {/* 3. EXECUTIVE PREMIUM (Emerald Gold Theme)                      */}
             {/* ------------------------------------------------------------- */}
@@ -1166,9 +1272,9 @@ export default function PayslipPage() {
             )}
 
             {/* ------------------------------------------------------------- */}
-            {/* 4. TECH STARTUP                                               */}
+            {/* Legacy layout slot intentionally unused */}
             {/* ------------------------------------------------------------- */}
-            {selectedTemplate === "Startup" && (
+            {false && (
               <div className="space-y-4 text-xs font-sans text-slate-900">
                 <div className="flex items-center justify-between border-b border-purple-200 pb-3">
                   <div className="flex items-center gap-2.5">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { buildVolkswagenFragment, defaultVwPayslipData } from "@/lib/volkswagen-payslip";
 
 interface TemplateConfig {
   id: string;
@@ -14,7 +15,7 @@ interface TemplateConfig {
   accentBorder: string;
   isActive: boolean;
   isDefault: boolean;
-  layout: "Corporate" | "Minimal" | "Executive" | "Startup";
+  layout: "Corporate" | "Minimal" | "Executive" | "Volkswagen";
   fields: {
     showLogo: boolean;
     showCompanyAddress: boolean;
@@ -145,31 +146,29 @@ const initialTemplates: TemplateConfig[] = [
       "Official executive statement. Tax deducted at source as per Income Tax Act provisions.",
   },
   {
-    id: "tpl-startup-indigo",
-    name: "Tech Startup",
-    category: "Modern SaaS & Creative",
-    description:
-      "Vibrant card-based earnings & deductions structure with verification QR seal, modern rounded tags, and gradient banners.",
-    themeColor: "#8b5cf6",
-    themeGradient: "from-indigo-500 via-purple-500 to-pink-500",
-    accentBg: "bg-purple-500/10",
-    accentText: "text-purple-400",
-    accentBorder: "border-purple-500/30",
-    isActive: false,
+    id: "tpl-volkswagen",
+    name: "Volkswagen Payslip",
+    category: "German Payroll",
+    description: "Volkswagen-style German monthly payroll statement with highlighted editable employee and payment fields.",
+    themeColor: "#111827",
+    themeGradient: "from-slate-800 to-slate-950",
+    accentBg: "bg-slate-500/10",
+    accentText: "text-slate-300",
+    accentBorder: "border-slate-500/30",
+    isActive: true,
     isDefault: false,
-    layout: "Startup",
+    layout: "Volkswagen",
     fields: {
       showLogo: true,
       showCompanyAddress: true,
       showPanUan: true,
       showBankDetails: true,
       showAttendance: true,
-      showAmountInWords: true,
+      showAmountInWords: false,
       showSignatory: false,
-      showQrCode: true,
+      showQrCode: false,
     },
-    notes:
-      "Digitally verified payslip issued through Payslip Pro platform.",
+    notes: "Volkswagen-style payroll template. Yellow-highlighted values are data-driven.",
   },
 ];
 
@@ -193,17 +192,21 @@ export default function PayslipTemplatesPage() {
               byId.set(template.id, template);
             });
 
-            data.templates.forEach((template: Partial<TemplateConfig> & { id: string }) => {
-              const base = byId.get(template.id) ?? (template as TemplateConfig);
-              byId.set(template.id, {
-                ...base,
-                ...template,
-                fields: {
-                  ...base.fields,
-                  ...(template.fields || {}),
-                },
+            data.templates
+              .filter((template: Partial<TemplateConfig>) =>
+                ["Corporate", "Minimal", "Executive", "Volkswagen"].includes(template.layout ?? "")
+              )
+              .forEach((template: Partial<TemplateConfig> & { id: string }) => {
+                const base = byId.get(template.id) ?? (template as TemplateConfig);
+                byId.set(template.id, {
+                  ...base,
+                  ...template,
+                  fields: {
+                    ...base.fields,
+                    ...(template.fields || {}),
+                  },
+                });
               });
-            });
 
             return Array.from(byId.values());
           });
@@ -641,7 +644,7 @@ export default function PayslipTemplatesPage() {
       {/* Modal: Live Realistic Payslip Preview for Selected Template */}
       {previewTemplate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-3 sm:p-6 backdrop-blur-md overflow-y-auto">
-          <div className="relative w-full max-w-3xl my-auto rounded-3xl border border-white/15 bg-surface p-5 sm:p-8 shadow-2xl backdrop-blur-2xl">
+          <div className="relative w-full max-w-4xl my-auto rounded-3xl border border-white/15 bg-surface p-5 sm:p-8 shadow-2xl backdrop-blur-2xl">
             {/* Modal Controls Header */}
             <div className="flex items-center justify-between border-b border-white/10 pb-4 print:hidden">
               <div className="flex items-center gap-2">
@@ -1029,9 +1032,19 @@ export default function PayslipTemplatesPage() {
               )}
 
               {/* ========================================================= */}
-              {/* 4. TECH STARTUP LAYOUT */}
+              {/* 4. VOLKSWAGEN (German payroll statement) */}
               {/* ========================================================= */}
-              {previewTemplate.layout === "Startup" && (
+              {previewTemplate.layout === "Volkswagen" && (
+                <div
+                  className="-m-5 overflow-x-auto rounded-2xl bg-white sm:-m-7"
+                  dangerouslySetInnerHTML={{ __html: buildVolkswagenFragment(defaultVwPayslipData) }}
+                />
+              )}
+
+              {/* ========================================================= */}
+              {/* Legacy layout slot intentionally unused */}
+              {/* ========================================================= */}
+              {false && (
                 <div className="space-y-4 text-xs">
                   {/* Gradient Brand Header */}
                   <div className="flex items-center justify-between">
