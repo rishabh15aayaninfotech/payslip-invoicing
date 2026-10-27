@@ -11,10 +11,11 @@ export default function LoginPage() {
         <div className="absolute -bottom-32 right-1/4 h-80 w-80 rounded-full bg-accent-strong/10 blur-3xl" />
       </div>
 
+      <div className="absolute right-4 top-4 z-10 sm:right-6 sm:top-6">
+        <ThemeToggle />
+      </div>
+
       <div className="relative w-full max-w-[420px]">
-        <div className="absolute -top-14 right-0 sm:-top-16">
-          <ThemeToggle />
-        </div>
 
         {/* Main Card */}
         <div className="rounded-3xl border border-white/10 bg-surface/85 p-8 shadow-[0_24px_80px_rgba(0,0,0,0.4)] backdrop-blur-2xl sm:p-9">
