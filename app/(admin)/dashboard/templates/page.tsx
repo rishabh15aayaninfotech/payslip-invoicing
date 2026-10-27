@@ -1040,65 +1040,6 @@ export default function PayslipTemplatesPage() {
                   dangerouslySetInnerHTML={{ __html: buildVolkswagenFragment(defaultVwPayslipData) }}
                 />
               )}
-
-              {/* ========================================================= */}
-              {/* Legacy layout slot intentionally unused */}
-              {/* ========================================================= */}
-              {false && (
-                <div className="space-y-4 text-xs">
-                  {/* Gradient Brand Header */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-sm font-bold text-white shadow-lg shadow-purple-500/20">
-                        PI
-                      </div>
-                      <div>
-                        <h2 className="text-base font-bold text-white">{sampleEmployeeData.companyName}</h2>
-                        <p className="text-[11px] text-purple-300">{sampleEmployeeData.month}</p>
-                      </div>
-                    </div>
-
-                    <span className="rounded-full bg-purple-500/15 border border-purple-500/30 px-3 py-1 text-xs font-semibold text-purple-300">
-                      Take-Home: ₹{net.toLocaleString("en-IN")}
-                    </span>
-                  </div>
-
-                  {/* Card Columns for Earnings vs Deductions */}
-                  <div className="grid gap-3 sm:grid-cols-2 pt-2">
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
-                      <div className="flex justify-between font-semibold text-purple-300 text-[11px]">
-                        <span>Earnings</span>
-                        <span>₹{gross.toLocaleString("en-IN")}</span>
-                      </div>
-                      <div className="space-y-1 text-white/70 text-[11px]">
-                        <div className="flex justify-between"><span>Basic Pay</span><span>₹55,000</span></div>
-                        <div className="flex justify-between"><span>HRA</span><span>₹22,000</span></div>
-                        <div className="flex justify-between"><span>Special Allowance</span><span>₹15,000</span></div>
-                        <div className="flex justify-between"><span>Bonus</span><span>₹5,000</span></div>
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-3 space-y-2">
-                      <div className="flex justify-between font-semibold text-pink-300 text-[11px]">
-                        <span>Deductions</span>
-                        <span>₹{deductions.toLocaleString("en-IN")}</span>
-                      </div>
-                      <div className="space-y-1 text-white/70 text-[11px]">
-                        <div className="flex justify-between"><span>PF</span><span>₹4,200</span></div>
-                        <div className="flex justify-between"><span>PT</span><span>₹200</span></div>
-                        <div className="flex justify-between"><span>TDS / Income Tax</span><span>₹5,800</span></div>
-                        <div className="flex justify-between"><span>Insurance</span><span>₹1,000</span></div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Verification footer */}
-                  <div className="flex items-center justify-between rounded-xl bg-purple-950/20 border border-purple-500/20 p-3 text-[11px] text-white/60">
-                    <span>{previewTemplate.notes}</span>
-                    <span className="text-purple-300 font-medium">Verified ID: {sampleEmployeeData.slipId}</span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
